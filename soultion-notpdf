@@ -1,0 +1,25 @@
+---
+title: "Solution.pdf"
+author: "Tristan Nicolaus, Chloe Blankers, Zac Nasu"
+vnumbers: V00193393, 
+date: "2023-04-08"
+---
+
+
+###Phil.smv:
+
+This simple polling solution, uses a variable ticket which takes on values in {0,1,2,3,4} to indicate whose turn it is to pick up chopsticks and eat. Ticket starts at
+philosopher zero and is passed around in ascending order, then back to philosopher zero after the 4th one. In the next() function for left and right the philosopher 
+checks if the chopstick is free and also if it is his/her turn to pick up the chopstick before actually picking up the chopstick. The ticket was passed into the 
+philosopher() function as "turn". The next() function for turn simply increases ticket by 1(mod 5) if the philosopher is either thinking or done eating and has put
+down the chopsticks (If we passed the ticket before they put down the chopsticks we would have issues). 
+
+The FAIRNESS !(state=eating) constraint say that a philosopher cannot eat forever, and the FAIRNESS running constraint enforces that each process must be executed 
+infinitely often. The safety constraint SPEC AG((atate=eating)->(gotleft & gotright & myturn)) says that on all paths globally if a philosopher is eating then he/she
+must be holding both chopsticks, and it must be their turn to eat. This ensures safety; that two processses that share resources cannot be in their critical section at
+the same time, by making sure that two philopophers are not holding the same fork at once. The liveness spec says that along all paths globally if a philosopher is
+hungry then along all paths eventually he /she will eat. Ensuring that no process is starved and unable to reach its critical section forever.
+
+
+###phil.extended.smv
+

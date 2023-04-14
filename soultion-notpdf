@@ -6,7 +6,7 @@ date: "2023-04-08"
 ---
 
 
-###Phil.smv:
+###phil.smv:
 
 This simple polling solution, uses a variable ticket which takes on values in {0,1,2,3,4} to indicate whose turn it is to pick up chopsticks and eat. Ticket starts at
 philosopher zero and is passed around in ascending order, then back to philosopher zero after the 4th one. In the next() function for left and right the philosopher 

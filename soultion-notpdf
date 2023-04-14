@@ -15,7 +15,7 @@ philosopher() function as "turn". The next() function for turn simply increases 
 down the chopsticks (If we passed the ticket before they put down the chopsticks we would have issues). 
 
 The FAIRNESS !(state=eating) constraint say that a philosopher cannot eat forever, and the FAIRNESS running constraint enforces that each process must be executed 
-infinitely often. The safety constraint SPEC AG((atate=eating)->(gotleft & gotright & myturn)) says that on all paths globally if a philosopher is eating then he/she
+infinitely often. The safety constraint SPEC AG((state=eating)->(gotleft & gotright & myturn)) says that on all paths globally if a philosopher is eating then he/she
 must be holding both chopsticks, and it must be their turn to eat. This ensures safety; that two processses that share resources cannot be in their critical section at
 the same time, by making sure that two philopophers are not holding the same fork at once. The liveness spec says that along all paths globally if a philosopher is
 hungry then along all paths eventually he /she will eat. Ensuring that no process is starved and unable to reach its critical section forever.

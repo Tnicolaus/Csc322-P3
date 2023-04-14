@@ -23,3 +23,39 @@ hungry then along all paths eventually he /she will eat. Ensuring that no proces
 
 ###phil.extended.smv
 
+To add concurrency to the solution, we built upon the previous implementation but included 2 tickets instead of one. 
+Since there are 5 chopsticks, it is possible for two philosophers to be eating simultaneously if they are not sitting beside each other. 
+In this file, the first ticket is initialized to 0 and the second to 2, since philosophers 0 and 2 sit across from each other. 
+Both tickets are passed to the Philosopher module along with the chopsticks and philosophers id value. 
+In the Philosopher module tickets are referred to as turn1 (ticket1) and turn2 (ticket2). 
+Here, the myturn variable is set to true if either turn1 or turn2 is equal to the philosopher's id (i). 
+The next(left), next(right) and next(state) remain the same but the next(turn) function is now replaced by next(turn1) and next(turn2) 
+since we do not know which turn variable the current philosopher is using and we need to update one of those values. 
+For next(turn1), we set turn1 to the next philosopher if the current philosopher's state is thinking and turn1 = i. 
+We also set turn1 to the next philosopher if he current state is done, both chopsticks are free and turn1 = i. 
+The same process is followed for next(turn2). 
+
+All the previous specifications remain unchanged and still hold but new specifications were added in the main module. The first specification is:
+   SPEC
+   EG (
+     (EF ((p0.state = eating) & (p2.state = eating))) &
+     (EF ((p1.state = eating) & (p3.state = eating))) &
+     (EF ((p2.state = eating) & (p4.state = eating))) &
+     (EF ((p3.state = eating) & (p0.state = eating))) &
+     (EF ((p4.state = eating) & (p1.state = eating)))
+   )
+Which translates to “It is true that eventually p0 & p2 are both in the eating state, and p1 & p3 are both in the eating state, 
+and p2 & p4 are both in the eating state, p3 & p0 are both in the eating state, and p4 and p1 are both in the eating state." 
+This means that it is true that philosophers who sit across from each other will eat concurrently. The next specification is:
+   SPEC
+   AG (
+     (AG !((p0.state = eating) & (p1.state = eating))) &
+     (AG !((p1.state = eating) & (p2.state = eating))) &
+     (AG !((p2.state = eating) & (p3.state = eating))) &
+     (AG !((p3.state = eating) & (p4.state = eating))) &
+     (AG !((p4.state = eating) & (p0.state = eating)))
+   )
+Which translates to “For all paths of the system, it should always hold that no two adjacent philosophers can be in the "eating" state simultaneously.”
+Essentially, philosopher’s cannot both be eating if they sit beside each other since there are not enough chopsticks for both. 
+
+

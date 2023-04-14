@@ -1,0 +1,149 @@
+--
+-- CSC 322 Project 3
+--
+-- Name: Tristan Nicolaus
+-- Vnum: V00913393
+-- Name: Chloe Blankers
+-- Vnum: V00917921
+-- Name: Zachary Nasu
+-- Vnum: V00911790
+--
+MODULE main
+  
+  VAR
+    chopsticks : array 0..4 of {nobody,0,1,2,3,4}; -- who holds the chopstick.
+    ticket1 : {0,1,2,3,4}; --who's turn it is to grab chopsticks
+    ticket2 : {0,1,2,3,4}; --who's turn it is to grab chopsticks
+    --
+    -- Philosopher i has chopstick i on left and chopstick
+    -- (i + 1) mod 5 on right
+    --
+    p0 : process philosopher(0,chopsticks[0],chopsticks[1],ticket1,ticket2);
+    p1 : process philosopher(1,chopsticks[1],chopsticks[2],ticket1,ticket2);
+    p2 : process philosopher(2,chopsticks[2],chopsticks[3],ticket1,ticket2);
+    p3 : process philosopher(3,chopsticks[3],chopsticks[4],ticket1,ticket2);
+    p4 : process philosopher(4,chopsticks[4],chopsticks[0],ticket1,ticket2);
+  
+  ASSIGN
+    --
+    -- Initially, all chopsticks are free
+    --
+    init(chopsticks[0]) := nobody;
+    init(chopsticks[1]) := nobody;
+    init(chopsticks[2]) := nobody;
+    init(chopsticks[3]) := nobody;
+    init(chopsticks[4]) := nobody;
+    --
+    --Initially p0 and p2 have a ticket
+    --
+    init(ticket1) := 0;
+    init(ticket2) := 2;
+
+    -- It is possible for Philosophers sitting accross from eachother to eat concurrently
+    SPEC 
+    EG (
+      (EF ((p0.state = eating) & (p2.state = eating))) | 
+      (EF ((p1.state = eating) & (p3.state = eating))) |
+      (EF ((p2.state = eating) & (p4.state = eating))) |
+      (EF ((p3.state = eating) & (p0.state = eating))) |
+      (EF ((p4.state = eating) & (p1.state = eating)))
+    )
+    -- Philosophers sitting beside eachother will never eat concurrently
+    SPEC 
+    AG (
+      (AG !((p0.state = eating) & (p1.state = eating))) & 
+      (AG !((p1.state = eating) & (p2.state = eating))) &
+      (AG !((p2.state = eating) & (p3.state = eating))) &
+      (AG !((p3.state = eating) & (p4.state = eating))) &
+      (AG !((p4.state = eating) & (p0.state = eating)))
+    )
+
+MODULE philosopher(i,left,right,turn1,turn2)
+  
+  VAR
+    state : {thinking, hungry, eating, done};
+    
+  DEFINE
+    --
+    -- These are just abbreviations, not state variables
+    --
+    gotleft := (left=i);
+    gotright := (right=i);
+    leftfree := (left=nobody);
+    rightfree := (right=nobody);
+    myturn := (turn1=i) | (turn2=i);
+      
+  ASSIGN
+    init(state) := thinking;
+
+    next(left)  := case
+      (state = done) : nobody; -- drop chopstick
+      --
+      -- if hungry and left chopstick is free and its myturn, take it
+      --
+      (state=hungry) & leftfree & myturn : i;
+      TRUE : left;
+    esac;
+
+    next(right) := case
+      (state = done) : nobody; -- drop chopstick
+      --
+      -- if hungry and have left chopstick and right is free and myturn, take it
+      --
+      (state=hungry) & gotleft & rightfree & myturn : i; 
+      TRUE : right;
+    esac;
+
+    next(state) := case
+      (state=thinking) : {thinking, hungry};
+      (state=hungry) & gotleft & gotright : eating;
+      (state=hungry) : hungry; -- don't have chopsticks
+      (state=eating) : {eating, done};
+      (state=done) : thinking;
+      TRUE : state;
+    esac;
+
+    next(turn1) := case
+      --set turn to next if thinking
+      (state=thinking) & myturn & turn1=i & (i=0): 1;
+      (state=thinking) & myturn & turn1=i & (i=1): 2;
+      (state=thinking) & myturn & turn1=i & (i=2): 3;
+      (state=thinking) & myturn & turn1=i & (i=3): 4;
+      (state=thinking) & myturn & turn1=i & (i=4): 0;
+      --set turn to next if done and not holding chopsticks
+      (state=done) & myturn & leftfree & rightfree & turn1=i & (i=0) : 1;
+      (state=done) & myturn & leftfree & rightfree & turn1=i & (i=1) : 2;
+      (state=done) & myturn & leftfree & rightfree & turn1=i & (i=2) : 3;
+      (state=done) & myturn & leftfree & rightfree & turn1=i & (i=3) : 4;
+      (state=done) & myturn & leftfree & rightfree & turn1=i & (i=4) : 0;
+      TRUE : turn1;
+    esac;
+
+    next(turn2) := case
+      --set turn to next if thinking
+      (state=thinking) & myturn & turn2=i & (i=0): 1;
+      (state=thinking) & myturn & turn2=i & (i=1): 2;
+      (state=thinking) & myturn & turn2=i & (i=2): 3;
+      (state=thinking) & myturn & turn2=i & (i=3): 4;
+      (state=thinking) & myturn & turn2=i & (i=4): 0;
+      --set turn to next if done and not holding chopsticks
+      (state=done) & myturn & leftfree & rightfree & turn2=i & (i=0) : 1;
+      (state=done) & myturn & leftfree & rightfree & turn2=i & (i=1) : 2;
+      (state=done) & myturn & leftfree & rightfree & turn2=i & (i=2) : 3;
+      (state=done) & myturn & leftfree & rightfree & turn2=i & (i=3) : 4;
+      (state=done) & myturn & leftfree & rightfree & turn2=i & (i=4) : 0;
+      TRUE : turn2;
+    esac;
+
+  -- add fairness constraints here
+  FAIRNESS !(state = eating)   --not always eating
+  FAIRNESS running
+  -- add specifications here 
+
+  -- safety:
+  --whenever eating holds both chopsticks
+  SPEC AG((state=eating) -> (gotleft & gotright))
+
+  -- liveness:
+  --whenever hungry eventually eats
+  SPEC AG((state=hungry) -> AF(state=eating))

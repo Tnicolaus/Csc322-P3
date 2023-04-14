@@ -107,7 +107,7 @@ MODULE philosopher(i,left,right,turn)
 
   -- safety:
   --whenever eating holds both chopsticks
-  SPEC AG((state=eating) -> (gotleft & gotright))
+  SPEC AG((state=eating) -> (gotleft & gotright & myturn))
   -- liveness:
   --whenever hungry eventually eats
   SPEC AG((state=hungry) -> AF(state=eating))
